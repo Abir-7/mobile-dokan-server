@@ -1,3 +1,5 @@
+import { Schema } from "mongoose";
+
 export interface IVariant {
   storage: string; // e.g., "128GB"
   ram: string; // e.g., "8GB"
@@ -10,6 +12,7 @@ export interface IVariant {
 export interface IProduct extends Document {
   _id: string;
   brand: string;
+  image: string[];
   model: string;
   variants: IVariant[]; // Array of variants
   features: {
@@ -25,5 +28,6 @@ export interface IProduct extends Document {
     average: number;
     count: number;
   };
+  seller: Schema.Types.ObjectId; // Seller's user ID
   isDeleted?: boolean;
 }

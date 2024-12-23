@@ -32,8 +32,22 @@ const changeUserRoleToSeller = catchAsync(async (req, res, next) => {
     data: result,
   });
 });
+
+const deleteUser = catchAsync(async (req, res, next) => {
+  const { data } = req.body;
+  console.log(req.body);
+  const result = await UserService.deleteUser(data);
+  sendResponse(res, {
+    message: "User Deleted",
+    success: true,
+    statusCode: 200,
+    data: result,
+  });
+});
+
 export const UserController = {
   createUser,
   getAllUsers,
   changeUserRoleToSeller,
+  deleteUser,
 };

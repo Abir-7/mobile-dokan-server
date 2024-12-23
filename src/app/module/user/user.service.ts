@@ -71,14 +71,17 @@ const createUser = async (data: Partial<ICreateUser>) => {
 };
 
 const getAllUsers = async () => {
-  const users = await User.find();
+  const users = await User.find({
+    role: { $nin: ["admin", "superAdmin"] },
+  });
+
   return users;
 };
 
 const changeUserRoleToSeller = async (email: string) => {
   const user = await User.findOne({ email: email });
   if (user?.role !== "customer") {
-    throw new Error("User alreaty seller");
+    throw new AppError(500, "User alreaty seller");
   }
 
   const customerData = await Customer.findOne({ email: email });
@@ -92,8 +95,22 @@ const changeUserRoleToSeller = async (email: string) => {
   return seller;
 };
 
+const deleteUser = async (email: string) => {
+  console.log(email);
+  const user = await User.findOneAndUpdate(
+    { email: email },
+    { isDeleted: true }
+  );
+  if (!user) {
+    throw new Error("User not found");
+  }
+  await User.findOneAndDelete({ email: email });
+  return user;
+};
+
 export const UserService = {
   createUser,
   getAllUsers,
   changeUserRoleToSeller,
+  deleteUser,
 };

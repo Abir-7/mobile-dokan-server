@@ -12,6 +12,7 @@ const VariantSchema = new Schema<IVariant>({
 const MobileSchema = new Schema<IProduct>(
   {
     brand: { type: String, required: true },
+    image: { type: [String], required: true },
     model: { type: String, required: true },
     variants: { type: [VariantSchema], required: true }, // Array of variants
     features: {
@@ -28,6 +29,7 @@ const MobileSchema = new Schema<IProduct>(
       count: { type: Number, default: 0 },
     },
     isDeleted: { type: Boolean, default: false },
+    seller: { type: Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );

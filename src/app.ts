@@ -5,10 +5,14 @@ import notFoundHandler from "./app/middleware/notFoundHandler";
 import router from "./app/routes";
 
 const app = express();
-const port = 3000;
-
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Replace with your client's origin
+    credentials: true, // Allow credentials (cookies, etc.)
+  })
+);
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("Wellcome to Mobile-Dokan");

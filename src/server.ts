@@ -2,6 +2,7 @@ import app from "./app";
 import { config } from "./app/config/config";
 
 import mongoose from "mongoose";
+import seedSuperAdmin from "./app/DB/seedAdmin";
 
 // Handle uncaught exceptions
 process.on("uncaughtException", (err) => {
@@ -19,7 +20,7 @@ async function main() {
   try {
     await mongoose.connect(config.mongoDb_Uri as string);
     console.log("Connected to MongoDB successfully!");
-
+    seedSuperAdmin();
     app.listen(config.port, () => {
       console.log(`Example app listening on port ${config.port}`);
     });
