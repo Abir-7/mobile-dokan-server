@@ -45,8 +45,20 @@ const changeUserRoleToSeller = (0, catchAsync_1.default)((req, res, next) => __a
         data: result,
     });
 }));
+const deleteUser = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { data } = req.body;
+    console.log(req.body);
+    const result = yield user_service_1.UserService.deleteUser(data);
+    (0, sendResponse_1.sendResponse)(res, {
+        message: "User Deleted",
+        success: true,
+        statusCode: 200,
+        data: result,
+    });
+}));
 exports.UserController = {
     createUser,
     getAllUsers,
     changeUserRoleToSeller,
+    deleteUser,
 };

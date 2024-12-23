@@ -9,9 +9,12 @@ const globalErrorHandler_1 = __importDefault(require("./app/middleware/globalErr
 const notFoundHandler_1 = __importDefault(require("./app/middleware/notFoundHandler"));
 const routes_1 = __importDefault(require("./app/routes"));
 const app = (0, express_1.default)();
-const port = 3000;
+app.use((0, cors_1.default)({
+    origin: "http://localhost:5173", // Replace with your client's origin
+    credentials: true, // Allow credentials (cookies, etc.)
+}));
+app.use(express_1.default.urlencoded({ extended: true }));
 app.use(express_1.default.json());
-app.use((0, cors_1.default)());
 app.get("/", (req, res) => {
     res.send("Wellcome to Mobile-Dokan");
 });

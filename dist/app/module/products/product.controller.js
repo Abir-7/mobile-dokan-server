@@ -17,7 +17,8 @@ const catchAsync_1 = __importDefault(require("../../lib/utils/catchAsync"));
 const sendResponse_1 = require("../../lib/utils/sendResponse");
 const product_service_1 = require("./product.service");
 const create = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield product_service_1.productService.create(req.body);
+    const { userEmail } = req.user;
+    const result = yield product_service_1.productService.create(req.body, userEmail);
     (0, sendResponse_1.sendResponse)(res, {
         message: "Product created successfully",
         data: result,
@@ -26,8 +27,9 @@ const create = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0,
     });
 }));
 const update = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     const { id } = req.params;
-    const result = yield product_service_1.productService.update(id, req.body);
+    const result = yield product_service_1.productService.update(id, (_a = req.body) === null || _a === void 0 ? void 0 : _a.data);
     (0, sendResponse_1.sendResponse)(res, {
         message: "Product updated successfully",
         data: result,
@@ -64,10 +66,31 @@ const deleteProduct = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
         success: true,
     });
 }));
+const productByAvarageRating = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield product_service_1.productService.ProductByAvarageRating();
+    (0, sendResponse_1.sendResponse)(res, {
+        message: "Product fetched successfully",
+        data: result,
+        statusCode: 200,
+        success: true,
+    });
+}));
+const sellerProduct = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userEmail } = req.user;
+    const result = yield product_service_1.productService.sellerProduct(userEmail);
+    (0, sendResponse_1.sendResponse)(res, {
+        message: "Product fetched successfully",
+        data: result,
+        statusCode: 200,
+        success: true,
+    });
+}));
 exports.productController = {
     create,
     update,
     getAllProduct,
     getProductById,
     deleteProduct,
+    productByAvarageRating,
+    sellerProduct,
 };

@@ -13,40 +13,54 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.productService = void 0;
+const user_model_1 = require("../user/user.model");
 const product_model_1 = __importDefault(require("./product.model"));
-const create = (data) => __awaiter(void 0, void 0, void 0, function* () {
+const create = (data, userEmail) => __awaiter(void 0, void 0, void 0, function* () {
     // create product logic
-    const result = yield product_model_1.default.create(data);
+    const user = yield user_model_1.User.findOne({ email: userEmail });
+    if (!user) {
+        throw new Error("User not found");
+    }
+    const result = yield product_model_1.default.create(Object.assign(Object.assign({}, data), { seller: user === null || user === void 0 ? void 0 : user._id }));
     return result;
 });
 const update = (productId, updatePayload) => __awaiter(void 0, void 0, void 0, function* () {
     // Extract model, features, and variants from the updatePayload
-    const { model, features, variants } = updatePayload;
+    const { model, features, variants, isAvailable } = updatePayload;
+    console.log(updatePayload);
     // Build the dynamic update object
     const updateObject = {};
-    // If the model is provided, update the model field
+    // If isAvailable is provided and not empty, update the isAvailable field
+    if (isAvailable !== undefined) {
+        updateObject.isAvailable = isAvailable;
+    }
+    // If the model is provided and not empty, update the model field
     if (model) {
         updateObject.model = model;
     }
     // If features are provided, update specific feature fields
     if (features) {
         for (const [key, value] of Object.entries(features)) {
-            updateObject[`features.${key}`] = value;
+            if (value !== undefined && value !== null && value !== "") {
+                updateObject[`features.${key}`] = value;
+            }
         }
     }
+    console.log(updateObject, "updateObject");
     // If variants are provided, loop through each variant and add the update for each variant
     if (variants && Array.isArray(variants)) {
         variants.forEach((variant) => {
             if (variant._id) {
                 // Dynamically build the update object for each field if it's provided
-                if (variant.price) {
+                if (variant.price !== undefined && variant.price !== null) {
                     updateObject[`variants.$[variant].price`] = variant.price;
                 }
-                if (variant.stockQuantity) {
+                if (variant.stockQuantity !== undefined &&
+                    variant.stockQuantity !== null) {
                     updateObject[`variants.$[variant].stockQuantity`] =
                         variant.stockQuantity;
                 }
-                if (variant.color) {
+                if (variant.color && variant.color.length > 0) {
                     updateObject[`variants.$[variant].color`] = variant.color;
                 }
                 if (variant.ram) {
@@ -62,7 +76,14 @@ const update = (productId, updatePayload) => __awaiter(void 0, void 0, void 0, f
     const arrayFilters = variants
         ? variants.map((variant) => ({ "variant._id": variant._id })) // Filter variants by _id
         : [];
-    console.log(updateObject, "gg", arrayFilters);
+    // Remove any fields with null, undefined, or empty values from the update object
+    for (const key in updateObject) {
+        if (updateObject[key] === undefined ||
+            updateObject[key] === null ||
+            updateObject[key] === "") {
+            delete updateObject[key];
+        }
+    }
     // Perform the update
     const updatedProduct = yield product_model_1.default.findOneAndUpdate({ _id: productId }, // Match the product by _id
     { $set: updateObject }, // Set the dynamic fields
@@ -80,7 +101,9 @@ const getAllProducts = () => __awaiter(void 0, void 0, void 0, function* () {
     const products = yield product_model_1.default.find({
         isDeleted: false,
     });
-    return products;
+    const brand = products.map((product) => product.brand);
+    const uniqueBrand = Array.from(new Set(brand));
+    return { products, uniqueBrand };
 });
 const getProductById = (productId) => __awaiter(void 0, void 0, void 0, function* () {
     const product = yield product_model_1.default.findById(productId);
@@ -88,6 +111,17 @@ const getProductById = (productId) => __awaiter(void 0, void 0, void 0, function
         throw new Error("Product not found");
     }
     return product;
+});
+const ProductByAvarageRating = () => __awaiter(void 0, void 0, void 0, function* () {
+    const topRatedProducts = yield product_model_1.default.aggregate([
+        // Match only available and non-deleted products
+        { $match: { isAvailable: true, isDeleted: false } },
+        // Sort by average rating in descending order
+        { $sort: { "ratings.average": -1 } },
+        // Limit to top 6 products
+        { $limit: 6 },
+    ]);
+    return topRatedProducts;
 });
 const deleteProduct = (productId) => __awaiter(void 0, void 0, void 0, function* () {
     const product = yield product_model_1.default.findById(productId);
@@ -98,10 +132,20 @@ const deleteProduct = (productId) => __awaiter(void 0, void 0, void 0, function*
     yield product.save();
     return product;
 });
+const sellerProduct = (userEmail) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findOne({ email: userEmail });
+    if (!user) {
+        throw new Error("User not found");
+    }
+    const products = yield product_model_1.default.find({ seller: user === null || user === void 0 ? void 0 : user._id, isDeleted: false });
+    return products;
+});
 exports.productService = {
     create,
     update,
     getAllProducts,
     getProductById,
     deleteProduct,
+    ProductByAvarageRating,
+    sellerProduct,
 };

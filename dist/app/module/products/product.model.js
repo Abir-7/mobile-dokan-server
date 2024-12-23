@@ -43,6 +43,7 @@ const VariantSchema = new mongoose_1.Schema({
 });
 const MobileSchema = new mongoose_1.Schema({
     brand: { type: String, required: true },
+    image: { type: [String], required: true },
     model: { type: String, required: true },
     variants: { type: [VariantSchema], required: true }, // Array of variants
     features: {
@@ -59,6 +60,7 @@ const MobileSchema = new mongoose_1.Schema({
         count: { type: Number, default: 0 },
     },
     isDeleted: { type: Boolean, default: false },
+    seller: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
 }, { timestamps: true });
 const Product = mongoose_1.default.model("Product", MobileSchema);
 exports.default = Product;

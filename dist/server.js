@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = __importDefault(require("./app"));
 const config_1 = require("./app/config/config");
 const mongoose_1 = __importDefault(require("mongoose"));
+const seedAdmin_1 = __importDefault(require("./app/DB/seedAdmin"));
 // Handle uncaught exceptions
 process.on("uncaughtException", (err) => {
     console.error("There was an uncaught exception:", err);
@@ -30,6 +31,7 @@ function main() {
         try {
             yield mongoose_1.default.connect(config_1.config.mongoDb_Uri);
             console.log("Connected to MongoDB successfully!");
+            (0, seedAdmin_1.default)();
             app_1.default.listen(config_1.config.port, () => {
                 console.log(`Example app listening on port ${config_1.config.port}`);
             });

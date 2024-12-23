@@ -55,13 +55,15 @@ const createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield user_model_1.User.find();
+    const users = yield user_model_1.User.find({
+        role: { $nin: ["admin", "superAdmin"] },
+    });
     return users;
 });
 const changeUserRoleToSeller = (email) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield user_model_1.User.findOne({ email: email });
     if ((user === null || user === void 0 ? void 0 : user.role) !== "customer") {
-        throw new Error("User alreaty seller");
+        throw new AppError(500, "User alreaty seller");
     }
     const customerData = yield customer_model_1.default.findOne({ email: email });
     if (!customerData) {
@@ -72,8 +74,18 @@ const changeUserRoleToSeller = (email) => __awaiter(void 0, void 0, void 0, func
     yield customer_model_1.default.findOneAndDelete({ email: email });
     return seller;
 });
+const deleteUser = (email) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(email);
+    const user = yield user_model_1.User.findOneAndUpdate({ email: email }, { isDeleted: true });
+    if (!user) {
+        throw new Error("User not found");
+    }
+    yield user_model_1.User.findOneAndDelete({ email: email });
+    return user;
+});
 exports.UserService = {
     createUser,
     getAllUsers,
     changeUserRoleToSeller,
+    deleteUser,
 };
